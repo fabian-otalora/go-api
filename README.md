@@ -70,7 +70,7 @@ Y su respuesta es en JSON
 
 ## Autor
 
-Fabian Alejandro Otalora Silva
+Fabián Alejandro Otálora Silva
 
 Desarrollador de Software 🇨🇴
 
