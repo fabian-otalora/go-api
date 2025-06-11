@@ -1,0 +1,15 @@
+# binarios y temporales
+*.exe
+*.out
+*.test
+*.log
+
+# dependencias externas
+vendor/
+
+# IDEs
+.vscode/
+.idea/
+
+# sistema operativo
+.DS_Store
