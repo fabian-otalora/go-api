@@ -17,6 +17,13 @@ Este servicio recibe un nombre y regresa un token temporal de maximo 5 usos
 | :-------- | :------- | :------------------------- |
 | `name` | `string` | Ingresa un nombre |
 
+Ejemplo: Petición en formato JSON
+```
+{
+    "name":"Fabi"
+}
+```
+
 Y su respuesta es en JSON
 ```
 {
