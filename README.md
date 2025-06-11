@@ -9,7 +9,7 @@ Este servicio recibe un nombre y regresa un token temporal de maximo 5 usos
 
 #### Obtener token
 
-```http
+```
   POST /token
 ```
 
@@ -30,7 +30,7 @@ Este servicio retorna desde la API publica The Rick and Morty un listado de pers
 
 #### Obtener personajes
 
-```http
+```
   GET /personajes
 ```
 
