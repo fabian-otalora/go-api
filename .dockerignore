@@ -1,0 +1,9 @@
+# Archivos que no deben copiarse al contenedor
+.git
+test/
+*.log
+*.test
+*.exe
+*.out
+.vscode/
+.idea/

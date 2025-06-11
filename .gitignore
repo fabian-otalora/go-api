@@ -3,6 +3,7 @@
 *.out
 *.test
 *.log
+mi-api
 
 # dependencias externas
 vendor/

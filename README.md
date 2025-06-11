@@ -2,6 +2,12 @@
 
 Version Go: 1.24.4
 
+## Docker
+Para crear el contenedor y poner en funcionamiento los servicios ejecutar el comando
+```
+ docker-compose up --build
+```
+
 ## API
 ### Servicio de autenticación
 
