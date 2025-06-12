@@ -14,8 +14,8 @@ func main() {
 	// Token
 	mux.HandleFunc("/token", handlers.PostToken)
 
-	// Personajes (protegido)
-	mux.Handle("/personajes", middleware.AuthMiddleware(http.HandlerFunc(handlers.GetPersonajes)))
+	// Personajes (se necesita el token para poder usar)
+	mux.Handle("/characters", middleware.AuthMiddleware(http.HandlerFunc(handlers.GetCharacters)))
 
 	log.Println("Servidor corriendo en :8080")
 	log.Fatal(http.ListenAndServe(":8080", mux))

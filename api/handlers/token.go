@@ -8,20 +8,24 @@ import (
 	"github.com/google/uuid"
 )
 
+// Parametro que se usara para generar el token
 type TokenRequest struct {
-	Nombre string `json:"nombre"`
+	Name string `json:"name"`
 }
 
+// Token temporal generado
 type TokenResponse struct {
 	Token string `json:"token"`
 }
 
+// Se guarda el token
 var TokenStore = make(map[string]time.Time)
 
+// Funcion que retorna el token temporal
 func PostToken(w http.ResponseWriter, r *http.Request) {
 	var req TokenRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Nombre == "" {
-		http.Error(w, "Debe enviar un nombre válido", http.StatusBadRequest)
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Name == "" {
+		http.Error(w, "Se requiere enviar un nombre válido", http.StatusBadRequest)
 		return
 	}
 

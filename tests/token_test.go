@@ -11,8 +11,9 @@ import (
 	"prueba/api/handlers"
 )
 
+// Test que prueba que el token fue generado con exito
 func TestPostTokenSuccess(t *testing.T) {
-	body := []byte(`{"nombre": "Morty"}`)
+	body := []byte(`{"name": "Morty"}`)
 	req := httptest.NewRequest(http.MethodPost, "/token", bytes.NewReader(body))
 	w := httptest.NewRecorder()
 
@@ -22,22 +23,23 @@ func TestPostTokenSuccess(t *testing.T) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("esperado 200 OK, recibido %d", resp.StatusCode)
+		t.Fatalf("Esperado 200 OK, recibido %d", resp.StatusCode)
 	}
 
 	var data map[string]string
 	bodyResp, _ := io.ReadAll(resp.Body)
 	if err := json.Unmarshal(bodyResp, &data); err != nil {
-		t.Fatal("no se pudo decodificar respuesta JSON")
+		t.Fatal("No se pudo decodificar respuesta JSON")
 	}
 
 	if _, ok := data["token"]; !ok {
-		t.Fatal("respuesta no contiene 'token'")
+		t.Fatal("Respuesta no contiene 'token'")
 	}
 }
 
+// Test que prueba que el token necesita el parametro name
 func TestPostTokenMissingName(t *testing.T) {
-	body := []byte(`{"nombre": ""}`)
+	body := []byte(`{"name": ""}`)
 	req := httptest.NewRequest(http.MethodPost, "/token", bytes.NewReader(body))
 	w := httptest.NewRecorder()
 
@@ -47,6 +49,6 @@ func TestPostTokenMissingName(t *testing.T) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusBadRequest {
-		t.Fatalf("esperado 400 BadRequest, recibido %d", resp.StatusCode)
+		t.Fatalf("Esperado 400 BadRequest, recibido %d", resp.StatusCode)
 	}
 }

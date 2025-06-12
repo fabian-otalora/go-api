@@ -16,7 +16,7 @@ Este servicio recibe un nombre y regresa un token temporal de maximo 5 usos
 #### Obtener token
 
 ```
-  POST /token
+  POST http://localhost:8080/token
 ```
 
 | Parámetro | Tipo     | Descripción                |
@@ -44,7 +44,7 @@ Este servicio retorna desde la API publica The Rick and Morty un listado de pers
 #### Obtener personajes
 
 ```
-  GET /personajes
+  GET http://localhost:8080/characters
 ```
 
 | Parámetro | Tipo     | Descripción                |
@@ -73,6 +73,15 @@ Y su respuesta es en JSON
 ]
 
 ```
+
+## Tests
+
+Si se desea ejecutar los tests el comando es el siguiente
+
+```
+go test ./tests/ -v
+```
+
 
 ## Autor
 
