@@ -36,7 +36,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		// Limitar intentos
 		attempts, found := tokenAttempts.Get(token)
 		if found && attempts.(int) >= MaxAttempts {
-			http.Error(w, "Demasiados intentos", http.StatusTooManyRequests)
+			http.Error(w, "Demasiados intentos, genere un nuevo token", http.StatusTooManyRequests)
 			return
 		}
 		if !found {
