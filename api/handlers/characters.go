@@ -23,27 +23,39 @@ type Character struct {
 // Obtener lista de personajes
 func GetCharacters(w http.ResponseWriter, r *http.Request) {
 	apiURL := os.Getenv("RICK_AND_MORTY_API")
+	if apiURL == "" {
+		apiURL = "https://rickandmortyapi.com/api/character"
+	}
+
 	resp, err := http.Get(apiURL)
 	if err != nil {
-		http.Error(w, "No se pudo obtener personajes", http.StatusInternalServerError)
+		http.Error(w, "Error al obtener personajes", http.StatusInternalServerError)
 		return
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		http.Error(w, "Error al obtener personajes", resp.StatusCode)
-		return
-	}
-
-	var data struct {
+	var apiResp struct {
 		Results []map[string]interface{} `json:"results"`
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		http.Error(w, "Error al parsear JSON", http.StatusInternalServerError)
+	if err := json.NewDecoder(resp.Body).Decode(&apiResp); err != nil {
+		http.Error(w, "Error al decodificar respuesta", http.StatusInternalServerError)
 		return
 	}
 
+	var characters []Character
+	for _, item := range apiResp.Results {
+		char := Character{
+			ID:      int(item["id"].(float64)),
+			Name:    item["name"].(string),
+			Status:  item["status"].(string),
+			Image:   item["image"].(string),
+			Gender:  item["gender"].(string),
+			Species: item["species"].(string),
+		}
+		characters = append(characters, char)
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data.Results)
+	json.NewEncoder(w).Encode(characters)
 }
