@@ -33,7 +33,8 @@ Ejemplo: Petición en formato JSON
 Y su respuesta es en JSON
 ```
 {
-    "token": "0b80f7c7-de32-40f0-8245-181ffb9a4c1f"
+    "token": "0b80f7c7-de32-40f0-8245-181ffb9a4c1f",
+    "expires_at": "2025-06-12T01:16:22.211904305Z"
 }
 ```
 
@@ -57,17 +58,26 @@ Y su respuesta es en JSON
     {
         "id": 1,
         "name": "Rick Sanchez",
-        "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+        "image": "https://rickandmortyapi.com/api/character/avatar/1.jpeg",
+        "status": "Alive",
+        "gender": "Male",
+        "species": "Human"
     },
     {
         "id": 2,
         "name": "Morty Smith",
-        "image": "https://rickandmortyapi.com/api/character/avatar/2.jpeg"
+        "image": "https://rickandmortyapi.com/api/character/avatar/2.jpeg",
+        "status": "Alive",
+        "gender": "Male",
+        "species": "Human"
     },
     {
         "id": 3,
         "name": "Summer Smith",
-        "image": "https://rickandmortyapi.com/api/character/avatar/3.jpeg"
+        "image": "https://rickandmortyapi.com/api/character/avatar/3.jpeg",
+        "status": "Alive",
+        "gender": "Female",
+        "species": "Human"
     },
     ....
 ]
