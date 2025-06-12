@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"os"
 )
 
 type RickAndMortyResponse struct {
@@ -21,16 +22,25 @@ type Character struct {
 
 // Obtener lista de personajes
 func GetCharacters(w http.ResponseWriter, r *http.Request) {
-	resp, err := http.Get("https://rickandmortyapi.com/api/character")
+	apiURL := os.Getenv("RICK_AND_MORTY_API")
+	resp, err := http.Get(apiURL)
 	if err != nil {
-		http.Error(w, "Error ", http.StatusInternalServerError)
+		http.Error(w, "No se pudo obtener personajes", http.StatusInternalServerError)
 		return
 	}
 	defer resp.Body.Close()
 
-	var data RickAndMortyResponse
+	if resp.StatusCode != http.StatusOK {
+		http.Error(w, "Error al obtener personajes", resp.StatusCode)
+		return
+	}
+
+	var data struct {
+		Results []map[string]interface{} `json:"results"`
+	}
+
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		http.Error(w, "Error al procesar datos", http.StatusInternalServerError)
+		http.Error(w, "Error al parsear JSON", http.StatusInternalServerError)
 		return
 	}
 

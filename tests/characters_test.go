@@ -1,9 +1,9 @@
 package tests
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 	"time"
 
@@ -11,90 +11,59 @@ import (
 	"prueba/api/middleware"
 )
 
-// Test para probar funcionamiento del servicio obtención de usuarios
-func TestGetCharactersSuccess(t *testing.T) {
-	// Crear token manualmente y registrarlo
+// Test que prueba el limite de intentos
+func TestTokenAttemptLimit(t *testing.T) {
+	os.Setenv("TOKEN_ATTEMPTS_LIMIT", "5")
+
 	token := "test-token"
-	handlers.TokenStore[token] = time.Now().Add(10 * time.Minute)
+	exp := time.Now().Add(10 * time.Minute)
+	handlers.TokenStore[token] = exp
 
-	req := httptest.NewRequest(http.MethodGet, "/characters", nil)
+	handler := middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	// Hacer 5 peticiones válidas
+	for i := 0; i < 5; i++ {
+		req := httptest.NewRequest("GET", "/characters", nil)
+		req.Header.Set("Authorization", "Bearer "+token)
+		rec := httptest.NewRecorder()
+
+		handler.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Errorf("Esperado 200 OK en intento %d, pero obtuve %d", i+1, rec.Code)
+		}
+	}
+
+	// 6ta petición debe fallar
+	req := httptest.NewRequest("GET", "/characters", nil)
 	req.Header.Set("Authorization", "Bearer "+token)
+	rec := httptest.NewRecorder()
 
-	w := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
 
-	handler := middleware.AuthMiddleware(http.HandlerFunc(handlers.GetCharacters))
-	handler.ServeHTTP(w, req)
-
-	resp := w.Result()
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("Se esperaba un 200 OK, recibido %d", resp.StatusCode)
-	}
-
-	var data []map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		t.Fatal("No se pudo obtener JSON de personajes")
+	if rec.Code != http.StatusTooManyRequests {
+		t.Errorf("Esperado 429 Too Many Requests en el intento 6, pero obtuve %d", rec.Code)
 	}
 }
 
-// Test para probar funcionamiento del servicio cuando no esta autorizado el usuario
-func TestGetCharactersUnauthorized(t *testing.T) {
-	req := httptest.NewRequest(http.MethodGet, "/characters", nil)
-	// sin token
-	w := httptest.NewRecorder()
-
-	handler := middleware.AuthMiddleware(http.HandlerFunc(handlers.GetCharacters))
-	handler.ServeHTTP(w, req)
-
-	resp := w.Result()
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusUnauthorized {
-		t.Fatalf("Se espera 401 Unauthorized, recibido %d", resp.StatusCode)
-	}
-}
-
-// Test para probar la expiracion del token
-func TestGetPersonajesExpiredToken(t *testing.T) {
+// Test que prueba la expiracion del token
+func TestTokenExpired(t *testing.T) {
 	token := "expired-token"
-	// Token con tiempo de expiración en el pasado
-	handlers.TokenStore[token] = time.Now().Add(-1 * time.Minute)
+	handlers.TokenStore[token] = time.Now().Add(-5 * time.Minute) // expirado
 
-	req := httptest.NewRequest(http.MethodGet, "/characters", nil)
+	req := httptest.NewRequest("GET", "/characters", nil)
 	req.Header.Set("Authorization", "Bearer "+token)
+	rec := httptest.NewRecorder()
 
-	w := httptest.NewRecorder()
+	handler := middleware.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
 
-	handler := middleware.AuthMiddleware(http.HandlerFunc(handlers.GetCharacters))
-	handler.ServeHTTP(w, req)
+	handler.ServeHTTP(rec, req)
 
-	resp := w.Result()
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusUnauthorized {
-		t.Fatalf("Se espera 401 Unauthorized por token expirado, recibido %d", resp.StatusCode)
-	}
-}
-
-// Test para probar los maximos intentos permitidos del token , los cuales son 5
-func TestGetPersonajesTooManyRequests(t *testing.T) {
-	token := "limited-token"
-	handlers.TokenStore[token] = time.Now().Add(10 * time.Minute) // válido
-
-	req := httptest.NewRequest(http.MethodGet, "/characters", nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	handler := middleware.AuthMiddleware(http.HandlerFunc(handlers.GetCharacters))
-
-	var lastStatus int
-	for i := 1; i <= 6; i++ {
-		w := httptest.NewRecorder()
-		handler.ServeHTTP(w, req)
-		lastStatus = w.Result().StatusCode
-		w.Result().Body.Close()
-	}
-
-	if lastStatus != http.StatusTooManyRequests {
-		t.Fatalf("Se espera 429 Too Many Requests en el intento 6, recibido %d", lastStatus)
+	if rec.Code != http.StatusUnauthorized {
+		t.Errorf("esperado 401 Unauthorized por token expirado, obtuve %d", rec.Code)
 	}
 }

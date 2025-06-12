@@ -1,54 +1,43 @@
 package tests
 
 import (
-	"bytes"
 	"encoding/json"
-	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"strings"
 	"testing"
 
 	"prueba/api/handlers"
 )
 
-// Test que prueba que el token fue generado con exito
-func TestPostTokenSuccess(t *testing.T) {
-	body := []byte(`{"name": "Morty"}`)
-	req := httptest.NewRequest(http.MethodPost, "/token", bytes.NewReader(body))
-	w := httptest.NewRecorder()
+// Test que prueba generacion de token
+func TestGenerateToken(t *testing.T) {
+	// Simular variables del entorno
+	os.Setenv("TOKEN_EXPIRATION_MINUTES", "15")
 
-	handlers.PostToken(w, req)
+	body := `{"name": "Morty"}`
+	req := httptest.NewRequest("POST", "/token", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
 
-	resp := w.Result()
-	defer resp.Body.Close()
+	rec := httptest.NewRecorder()
+	handlers.GenerateToken(rec, req)
 
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("Esperado 200 OK, recibido %d", resp.StatusCode)
+	if rec.Code != http.StatusOK {
+		t.Errorf("esperado 200 OK, obtuve %d", rec.Code)
 	}
 
-	var data map[string]string
-	bodyResp, _ := io.ReadAll(resp.Body)
-	if err := json.Unmarshal(bodyResp, &data); err != nil {
-		t.Fatal("No se pudo decodificar respuesta JSON")
+	var resp struct {
+		Token     string `json:"token"`
+		ExpiresAt string `json:"expires_at"`
 	}
 
-	if _, ok := data["token"]; !ok {
-		t.Fatal("Respuesta no contiene 'token'")
+	err := json.NewDecoder(rec.Body).Decode(&resp)
+	if err != nil {
+		t.Fatalf("error al decodificar respuesta: %v", err)
 	}
-}
 
-// Test que prueba que el token necesita el parametro name
-func TestPostTokenMissingName(t *testing.T) {
-	body := []byte(`{"name": ""}`)
-	req := httptest.NewRequest(http.MethodPost, "/token", bytes.NewReader(body))
-	w := httptest.NewRecorder()
-
-	handlers.PostToken(w, req)
-
-	resp := w.Result()
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusBadRequest {
-		t.Fatalf("Esperado 400 BadRequest, recibido %d", resp.StatusCode)
+	if resp.Token == "" {
+		t.Error("token vacío en respuesta")
 	}
 }

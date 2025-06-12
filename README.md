@@ -11,9 +11,9 @@ Para crear el contenedor y poner en funcionamiento los servicios ejecutar el com
 ## API
 ### Servicio de autenticación
 
-Este servicio recibe un nombre y regresa un token temporal de maximo 5 usos
+Este servicio recibe un nombre y regresa un token temporal de maximo 5 usos y con una duración maxima de 10 minutos
 
-#### Obtener token
+#### Generar token
 
 ```
   POST http://localhost:8080/token
